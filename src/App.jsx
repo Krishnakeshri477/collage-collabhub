@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Chat from './pages/Chat';
 import CollabHub from './pages/CollabHub';
-import LogIn from './pages/Login';
+import LogIn from './pages/LogIn';
 import Notification from './pages/Notification';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
