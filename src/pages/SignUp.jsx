@@ -1,8 +1,8 @@
 // src/pages/auth/Signup.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthForm from '../components/auth/AuthForm';
-import GoogleAuthBtn from '../components/auth/GoogleAuthBtn';
+import AuthForm from '../components/Auth/AuthForm';
+import GoogleAuthBtn from '../components/Auth/GoogleAuthBtn';
 
 const Signup = () => {
   const [error, setError] = useState('');
