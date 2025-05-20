@@ -1,6 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Layout/Navbar';
-import { FiMessageSquare, FiHeart, FiShare2, FiBookmark, FiMoreHorizontal, FiUserPlus, FiUserCheck, FiPlus, FiImage, FiX, FiSearch } from 'react-icons/fi';
+import { FiHeart, FiShare2, FiBookmark, FiMoreHorizontal, FiUserPlus, FiUserCheck, FiPlus } from 'react-icons/fi';
+import MessageFeature from '../components/Feature/MessageFeature';
+import CreatePostModal from '../components/Feature/CreatePostModal';
+import ShareModal from '../components/Feature/ShareModal';
 
 const Home = () => {
   // Sample users data
@@ -11,7 +14,7 @@ const Home = () => {
     { id: 4, name: 'Emma Wilson', username: 'emma_design', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80', major: 'Graphic Design' },
   ];
 
-  // Sample college collaboration posts with connection status
+  // Sample college collaboration posts with connection status and comments
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -23,7 +26,11 @@ const Home = () => {
       media: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80',
       skills: ['React', 'Python', 'TensorFlow'],
       likes: 15,
-      comments: 8,
+      commentsCount: 8,
+      comments: [
+        { id: 1, text: 'Interested in the frontend position! What tech stack are you using?', username: 'frontend_dev', timestamp: '1 hour ago' },
+        { id: 2, text: 'I have experience with TensorFlow. When is the hackathon?', username: 'ml_enthusiast', timestamp: '45 minutes ago' }
+      ],
       timestamp: '2 hours ago',
       isLiked: false,
       isBookmarked: false,
@@ -39,7 +46,12 @@ const Home = () => {
       media: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80',
       skills: ['Quantum Physics', 'Mathematics'],
       likes: 23,
-      comments: 12,
+      commentsCount: 12,
+      comments: [
+        { id: 1, text: 'I could use some help with the homework problems!', username: 'quantum_newbie', timestamp: '3 hours ago' },
+        { id: 2, text: 'What days are you planning to meet?', username: 'astro_student', timestamp: '2 hours ago' },
+        { id: 3, text: 'I can help tutor if needed, I took this class last semester', username: 'physics_major', timestamp: '1 hour ago' }
+      ],
       timestamp: '5 hours ago',
       isLiked: true,
       isBookmarked: false,
@@ -47,45 +59,13 @@ const Home = () => {
     }
   ]);
 
-  // State for new post modal and form
+  // State for modals
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPost, setNewPost] = useState({
-    title: '',
-    description: '',
-    skills: '',
-    media: null,
-    mediaPreview: null
-  });
-  const fileInputRef = useRef(null);
-
-  // State for share modal
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [currentPostId, setCurrentPostId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [message, setMessage] = useState('');
-
-  // Filter users based on search term
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewPost({
-          ...newPost,
-          media: file,
-          mediaPreview: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   // Handle like action
   const handleLike = (postId) => {
@@ -127,49 +107,6 @@ const Home = () => {
     }));
   };
 
-  // Handle new post input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewPost({
-      ...newPost,
-      [name]: value
-    });
-  };
-
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const mediaUrl = newPost.mediaPreview || 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&h=400&q=80';
-    
-    const newPostObj = {
-      id: posts.length + 1,
-      username: 'current_user',
-      userImage: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80',
-      userMajor: 'Your Major',
-      title: newPost.title,
-      description: newPost.description,
-      media: mediaUrl,
-      skills: newPost.skills.split(',').map(skill => skill.trim()),
-      likes: 0,
-      comments: 0,
-      timestamp: 'Just now',
-      isLiked: false,
-      isBookmarked: false,
-      isConnected: false
-    };
-
-    setPosts([newPostObj, ...posts]);
-    setNewPost({ 
-      title: '', 
-      description: '', 
-      skills: '', 
-      media: null,
-      mediaPreview: null 
-    });
-    setIsModalOpen(false);
-  };
-
   // Handle share button click
   const handleShareClick = (postId) => {
     setCurrentPostId(postId);
@@ -198,6 +135,50 @@ const Home = () => {
     setSelectedUsers([]);
     setMessage('');
     setIsShareModalOpen(false);
+  };
+
+  // Handle comment submission
+  const handleCommentSubmit = (postId, commentText) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        const newComment = {
+          id: post.comments.length + 1,
+          text: commentText,
+          username: 'current_user',
+          timestamp: 'Just now'
+        };
+        return {
+          ...post,
+          comments: [...post.comments, newComment],
+          commentsCount: post.commentsCount + 1
+        };
+      }
+      return post;
+    }));
+  };
+
+  // Handle new post submission
+  const handleNewPostSubmit = (postData) => {
+    const newPostObj = {
+      id: posts.length + 1,
+      username: 'current_user',
+      userImage: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&h=200&q=80',
+      userMajor: 'Your Major',
+      title: postData.title,
+      description: postData.description,
+      media: postData.media,
+      skills: postData.skills,
+      likes: 0,
+      commentsCount: 0,
+      comments: [],
+      timestamp: 'Just now',
+      isLiked: false,
+      isBookmarked: false,
+      isConnected: false
+    };
+
+    setPosts([newPostObj, ...posts]);
+    setIsModalOpen(false);
   };
 
   return (
@@ -296,13 +277,12 @@ const Home = () => {
                 </span>
               </button>
               
-              <button 
-                onClick={() => console.log(`Comment on post ${post.id}`)}
-                className="flex items-center space-x-1 hover:text-blue-400 transition-colors"
-              >
-                <FiMessageSquare size={20} />
-                <span className="text-sm">{post.comments}</span>
-              </button>
+              <MessageFeature
+                postId={post.id}
+                comments={post.comments}
+                commentsCount={post.commentsCount}
+                onCommentSubmit={handleCommentSubmit}
+              />
               
               <button 
                 onClick={() => handleShareClick(post.id)}
@@ -325,239 +305,30 @@ const Home = () => {
         ))}
       </div>
 
-      {/* Add Post Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white">Create New Post</h2>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-300 text-sm font-medium mb-2">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={newPost.title}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-gray-300 text-sm font-medium mb-2">Description</label>
-                <textarea
-                  name="description"
-                  value={newPost.description}
-                  onChange={handleInputChange}
-                  required
-                  rows={4}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-gray-300 text-sm font-medium mb-2">Skills Needed (comma separated)</label>
-                <input
-                  type="text"
-                  name="skills"
-                  value={newPost.skills}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="React, Python, Design"
-                />
-              </div>
-              
-              <div className="mb-6">
-                <label className="block text-gray-300 text-sm font-medium mb-2">Image Upload</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                  className="hidden"
-                />
-                <div 
-                  onClick={() => fileInputRef.current.click()}
-                  className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-gray-500 transition-colors"
-                >
-                  {newPost.mediaPreview ? (
-                    <div className="relative">
-                      <img 
-                        src={newPost.mediaPreview} 
-                        alt="Preview" 
-                        className="w-full h-40 object-cover rounded-lg mb-2"
-                      />
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setNewPost({...newPost, media: null, mediaPreview: null});
-                        }}
-                        className="absolute top-2 right-2 bg-gray-900 bg-opacity-70 text-white p-1 rounded-full hover:bg-opacity-100"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <FiImage size={40} className="mx-auto text-gray-500 mb-2" />
-                      <p className="text-gray-400">Click to upload an image</p>
-                      <p className="text-xs text-gray-500">(optional)</p>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Post
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Use the new CreatePostModal component */}
+      <CreatePostModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleNewPostSubmit}
+      />
 
-      {/* Share Modal */}
-      {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white">Share Post</h2>
-              <button 
-                onClick={() => {
-                  setIsShareModalOpen(false);
-                  setSelectedUsers([]);
-                  setMessage('');
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-300 text-sm font-medium mb-2">Search Users</label>
-              <div className="relative">
-                <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by name or username"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div className="mb-4 max-h-60 overflow-y-auto">
-              <h3 className="text-gray-300 text-sm font-medium mb-2">Select Users</h3>
-              {filteredUsers.length > 0 ? (
-                <ul className="space-y-2">
-                  {filteredUsers.map(user => (
-                    <li key={user.id} className="flex items-center justify-between p-2 hover:bg-gray-700 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <img 
-                          src={user.avatar} 
-                          alt={user.name} 
-                          className="w-8 h-8 rounded-full object-cover border border-gray-600"
-                        />
-                        <div>
-                          <p className="text-white text-sm">{user.name}</p>
-                          <p className="text-gray-400 text-xs">@{user.username} • {user.major}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => toggleUserSelection(user.id)}
-                        className={`p-1 rounded-full ${selectedUsers.includes(user.id) ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-                      >
-                        {selectedUsers.includes(user.id) ? <FiUserCheck size={16} /> : <FiUserPlus size={16} />}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400 text-center py-4">No users found</p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-300 text-sm font-medium mb-2">Add a Message (optional)</label>
-              <textarea
-                placeholder="Write a message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {selectedUsers.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-gray-300 text-sm font-medium mb-2">Selected Users</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedUsers.map(userId => {
-                    const user = users.find(u => u.id === userId);
-                    return (
-                      <div key={userId} className="flex items-center bg-gray-700 rounded-full pl-2 pr-1 py-1">
-                        <span className="text-white text-sm">{user.name}</span>
-                        <button
-                          onClick={() => toggleUserSelection(userId)}
-                          className="ml-1 text-gray-300 hover:text-white"
-                        >
-                          <FiX size={16} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsShareModalOpen(false);
-                  setSelectedUsers([]);
-                  setMessage('');
-                }}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleShareSubmit}
-                disabled={selectedUsers.length === 0}
-                className={`px-4 py-2 rounded-lg transition-colors ${selectedUsers.length === 0 ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-              >
-                Send ({selectedUsers.length})
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Use the new ShareModal component */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => {
+          setIsShareModalOpen(false);
+          setSelectedUsers([]);
+          setMessage('');
+        }}
+        users={users}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedUsers={selectedUsers}
+        toggleUserSelection={toggleUserSelection}
+        message={message}
+        setMessage={setMessage}
+        onSubmit={handleShareSubmit}
+      />
     </div>
   );
 };
