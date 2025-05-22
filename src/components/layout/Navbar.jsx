@@ -3,15 +3,15 @@ import { FaHome, FaBell, FaComments, FaSearch } from 'react-icons/fa';
 import { FaProjectDiagram, FaSitemap } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-const Navbar = ({ user }) => {
+const Navbar = ({ user, unreadChart = 0 ,unreadNotification = 0 }) => {
   return (
-    <nav className='flex justify-between items-center bg-zinc-800 p-4 text-white'>
-      <div className='flex items-center bg-zinc-700 rounded-full px-4 py-2 space-x-2'>
-        <FaSitemap className='text-xl' />
-        <Link to="/collabhub" className='font-semibold hover:text-blue-400 transition-colors'>
+    <nav className='flex justify-between items-center bg-zinc-800 p-4 text-white sticky top-0 z-50'>
+      <di className='bg-zinc-700 rounded-full px-4 py-2 space-x-2'>
+        <Link to="/collabhub" className='flex items-center font-semibold hover:text-blue-400 transition-colors'>
+           <FaSitemap className='text-xl' />
           Collab Hub
         </Link>
-      </div>
+      </di>
       
       {/* Search Bar */}
       <div className='flex items-center bg-zinc-700 rounded-full px-4 py-2 w-1/3'>
@@ -30,11 +30,19 @@ const Navbar = ({ user }) => {
         </Link>
         <Link to="/chat" className='hover:text-blue-400 transition-colors relative'>
           <FaComments className='text-xl' />
-          <span className='absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center'>5</span>
+          {unreadNotification > 0 && (
+            <span className='absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center'>
+              {unreadNotification > 9 ? '9+' : unreadNotification}
+            </span>
+          )}
         </Link>
         <Link to="/notifications" className='hover:text-blue-400 transition-colors relative'>
           <FaBell className='text-xl' />
-          <span className='absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center'>3</span>
+          {unreadChart > 0 && (
+            <span className='absolute -top-1 -right-1 bg-red-500 text-xs rounded-full h-4 w-4 flex items-center justify-center'>
+              {unreadChart > 9 ? '9+' : unreadChart}
+            </span>
+          )}
         </Link>
         <Link to="/profile" className='hover:text-blue-400 transition-colors'>
           {user?.profileImage ? (

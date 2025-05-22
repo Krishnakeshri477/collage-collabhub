@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Layout/Navbar';
-import { FiMessageSquare, FiHeart, FiShare2, FiBookmark, FiMoreHorizontal, FiPlus, FiUserPlus, FiUserCheck } from 'react-icons/fi';
+import { FiHeart, FiShare2, FiBookmark, FiPlus, FiUserPlus, FiUserCheck } from 'react-icons/fi';
 import MessageFeature from '../components/Feature/MessageFeature';
 import CreatePostModal from '../components/Feature/CreatePostModal';
 import ShareModal from '../components/Feature/ShareModal';
@@ -214,9 +214,6 @@ const CollabHub = () => {
                   className={`p-2 rounded-full ${project.isConnected ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'} transition-colors`}
                 >
                   {project.isConnected ? <FiUserCheck size={18} /> : <FiUserPlus size={18} />}
-                </button>
-                <button className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-gray-700">
-                  <FiMoreHorizontal size={20} />
                 </button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Layout/Navbar';
-import { FiHeart, FiShare2, FiBookmark, FiMoreHorizontal, FiUserPlus, FiUserCheck, FiPlus } from 'react-icons/fi';
+import { FiHeart, FiShare2, FiBookmark, FiUserPlus, FiUserCheck, FiPlus } from 'react-icons/fi';
 import MessageFeature from '../components/Feature/MessageFeature';
 import CreatePostModal from '../components/Feature/CreatePostModal';
 import ShareModal from '../components/Feature/ShareModal';
@@ -220,9 +220,6 @@ const Home = () => {
                   className={`p-2 rounded-full ${post.isConnected ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'} transition-colors`}
                 >
                   {post.isConnected ? <FiUserCheck size={18} /> : <FiUserPlus size={18} />}
-                </button>
-                <button className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-gray-700">
-                  <FiMoreHorizontal size={20} />
                 </button>
               </div>
             </div>
